@@ -2,50 +2,69 @@ import Thread from "../models/ThreadSchema.js";
 import Admin from "../models/Admin.js";
 
 // ✅ Create new thread
+// import Thread from "../models/Thread.js";
+// import Admin from "../models/Admin.js";
+
+// import Thread from "../models/Thread.js";
+// import Admin from "../models/Admin.js";
+
 export const createThread = async (req, res) => {
     try {
-        const { title, state, districtNames, block, department, departmentHeadNames } = req.body;
+        const { title, state, block, department, departmentHead, districtHead } = req.body;
 
-        // Validate Department Heads
-        if (!departmentHeadNames || departmentHeadNames.length === 0) {
+        // ✅ Validation
+        if (!departmentHead || departmentHead.length === 0) {
             return res.status(400).json({
                 success: false,
                 message: "Please select at least one department head.",
             });
         }
 
-        // Fetch department heads (admins)
-        const admins = await Admin.find({
-            departmentHeadName: { $in: departmentHeadNames },
-        });
-
-        if (admins.length === 0) {
-            return res.status(404).json({
+        if (!districtHead || districtHead.length === 0) {
+            return res.status(400).json({
                 success: false,
-                message: "No matching department heads found.",
+                message: "Please select at least one district head.",
             });
         }
 
-        // ✅ departmentHead array => name + email
-        const departmentHead = admins.map((admin) => ({
-            name: admin.departmentHeadName,
-            email: admin.departmentHeadEmail,
-        }));
+        // ✅ Extract head names
+        const departmentHeadNames = departmentHead.map((d) => d.name);
+        const districtHeadNames = districtHead.map((d) => d.name);
 
-        // ✅ district array => name + email (assuming Admin collection has district info)
-        const district = admins.map((admin) => ({
-            name: admin.districtHeadName,
-            email: admin.districtHeadEmail,
-        }));
+        // ✅ Fetch matching Admins from DB
+        const admins = await Admin.find({
+            $or: [
+                { departmentHeadName: { $in: departmentHeadNames } },
+                { districtHeadName: { $in: districtHeadNames } },
+            ],
+        });
+
+        // ✅ Department Heads (name + email)
+        const departmentHeadWithEmail = departmentHeadNames.map((name) => {
+            const admin = admins.find((a) => a.departmentHeadName === name);
+            return {
+                name,
+                email: admin ? admin.departmentHeadEmail : "N/A",
+            };
+        });
+
+        // ✅ District Heads (name + email)
+        const districtHeadWithEmail = districtHeadNames.map((name) => {
+            const admin = admins.find((a) => a.districtHeadName === name);
+            return {
+                name,
+                email: admin ? admin.districtHeadEmail : "N/A",
+            };
+        });
 
         // ✅ Create new thread
         const newThread = await Thread.create({
             title,
             state,
-            district,
             block,
             department,
-            departmentHead,
+            departmentHead: departmentHeadWithEmail, // [{ name, email }]
+            districtHead: districtHeadWithEmail,     // [{ name, email }]
         });
 
         res.status(201).json({
@@ -61,6 +80,9 @@ export const createThread = async (req, res) => {
         });
     }
 };
+
+
+
 
 
 
