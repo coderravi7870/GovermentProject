@@ -5,3 +5,5 @@ dist
 dist-ssr
 *.local
 .env
+
+git remote add origin https://github.com/mahi720/govtProjectBackend.git

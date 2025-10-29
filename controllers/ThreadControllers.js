@@ -1,14 +1,12 @@
-
 import Thread from "../models/ThreadSchema.js";
-
-// Create new thread
-
 import Admin from "../models/Admin.js";
 
+// ✅ Create new thread
 export const createThread = async (req, res) => {
     try {
-        const { title, state, district, block, department, departmentHeadNames } = req.body;
+        const { title, state, districtNames, block, department, departmentHeadNames } = req.body;
 
+        // Validate Department Heads
         if (!departmentHeadNames || departmentHeadNames.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -16,7 +14,7 @@ export const createThread = async (req, res) => {
             });
         }
 
-        // Find Admins with matching names
+        // Fetch department heads (admins)
         const admins = await Admin.find({
             departmentHeadName: { $in: departmentHeadNames },
         });
@@ -28,19 +26,26 @@ export const createThread = async (req, res) => {
             });
         }
 
-        // Build departmentHead array (name + email)
+        // ✅ departmentHead array => name + email
         const departmentHead = admins.map((admin) => ({
             name: admin.departmentHeadName,
             email: admin.departmentHeadEmail,
         }));
 
+        // ✅ district array => name + email (assuming Admin collection has district info)
+        const district = admins.map((admin) => ({
+            name: admin.districtHeadName,
+            email: admin.districtHeadEmail,
+        }));
+
+        // ✅ Create new thread
         const newThread = await Thread.create({
             title,
             state,
             district,
             block,
             department,
-            departmentHead, // automatically includes name + email
+            departmentHead,
         });
 
         res.status(201).json({
@@ -56,6 +61,7 @@ export const createThread = async (req, res) => {
         });
     }
 };
+
 
 
 // Get all threads

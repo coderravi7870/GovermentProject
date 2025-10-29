@@ -14,10 +14,12 @@ const ThreadSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-        district: {
-            type: [String], // array of district names
-            default: [],
-        },
+        district: [
+            {
+                name: { type: String, required: true },
+                email: { type: String, required: true },
+            }
+        ],
         block: {
             type: [String], // array of block names
             default: [],
