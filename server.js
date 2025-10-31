@@ -32,6 +32,7 @@ app.use(cors({
   origin: ["https://admin-goverment-project.vercel.app"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 }));
 
 app.use(express.json());
@@ -39,6 +40,7 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+app.options('*', cors());
 // Routes
 app.use("/api/admin", adminRouter);
 app.use("/api/threads", threadRouter);
