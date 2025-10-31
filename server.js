@@ -28,7 +28,12 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 
 // Middleware
-app.use(cors({ origin: ["https://admin-goverment-project.vercel.app"] }));
+app.use(cors({
+  origin: ["https://admin-goverment-project.vercel.app"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
 app.use(express.json());
 
 const __filename = fileURLToPath(import.meta.url);
