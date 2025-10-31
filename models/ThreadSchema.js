@@ -14,18 +14,22 @@ const ThreadSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-        district: [
+        district: {
+            type: [String], // only district names
+            default: [],
+        },
+        districtHead: [
             {
                 name: { type: String, required: true },
                 email: { type: String, required: true },
-            }
+            },
         ],
         block: {
-            type: [String], // array of block names
+            type: [String],
             default: [],
         },
         department: {
-            type: [String], // array of department names
+            type: [String],
             default: [],
         },
         departmentHead: [
@@ -38,31 +42,40 @@ const ThreadSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Virtual field for member count
+// ✅ Virtuals
+// ✅ Virtuals
 ThreadSchema.virtual("memberCount").get(function () {
-    return this.departmentHead.length;
+    // total heads count (district + department)
+    return this.departmentHead.length + this.districtHead.length;
 });
 
 ThreadSchema.virtual("memberNames").get(function () {
-    return this.departmentHead; // array of names
+    const deptNames = this.departmentHead.map(
+        (head) => `${head.name} - dept`
+    );
+    const distNames = this.districtHead.map(
+        (head) => `${head.name} - dist`
+    );
+
+    return [...deptNames, ...distNames];
 });
+
+
 
 ThreadSchema.set("toJSON", { virtuals: true });
 ThreadSchema.set("toObject", { virtuals: true });
 
-// ThreadSchema.virtual("unseenCount") ... add ye kar do
-
+// ✅ Unseen Message Count Virtual
 ThreadSchema.virtual("unseenCount", {
     ref: "Message",
     localField: "_id",
     foreignField: "thread",
     count: true,
-    match: { isSeen: false }, // sirf unseen messages count karega
+    match: { isSeen: false },
 });
 
-
-
 export default mongoose.model("Thread", ThreadSchema);
+
 
 
 // import mongoose from "mongoose";

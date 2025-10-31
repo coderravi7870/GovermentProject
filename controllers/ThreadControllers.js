@@ -10,7 +10,7 @@ import Admin from "../models/Admin.js";
 
 export const createThread = async (req, res) => {
     try {
-        const { title, state, block, department, departmentHead, districtHead } = req.body;
+        const { title, state, block, department, departmentHead, district, districtHead } = req.body;
 
         // ✅ Validation
         if (!departmentHead || departmentHead.length === 0) {
@@ -27,11 +27,11 @@ export const createThread = async (req, res) => {
             });
         }
 
-        // ✅ Extract head names
+        // ✅ Extract head names for lookup
         const departmentHeadNames = departmentHead.map((d) => d.name);
         const districtHeadNames = districtHead.map((d) => d.name);
 
-        // ✅ Fetch matching Admins from DB
+        // ✅ Fetch matching Admins
         const admins = await Admin.find({
             $or: [
                 { departmentHeadName: { $in: departmentHeadNames } },
@@ -39,7 +39,7 @@ export const createThread = async (req, res) => {
             ],
         });
 
-        // ✅ Department Heads (name + email)
+        // ✅ Department Heads (with email)
         const departmentHeadWithEmail = departmentHeadNames.map((name) => {
             const admin = admins.find((a) => a.departmentHeadName === name);
             return {
@@ -48,23 +48,30 @@ export const createThread = async (req, res) => {
             };
         });
 
-        // ✅ District Heads (name + email)
-        const districtHeadWithEmail = districtHeadNames.map((name) => {
-            const admin = admins.find((a) => a.districtHeadName === name);
+        // ✅ District Heads (with email fix)
+        const districtHeadWithEmail = districtHead.map((d) => {
+            // check if district head exists in Admin table
+            const admin = admins.find(
+                (a) =>
+                    a.districtHeadName === d.name ||
+                    a.districtHeadEmail === d.email // 👈 also check by email
+            );
             return {
-                name,
-                email: admin ? admin.districtHeadEmail : "N/A",
+                name: d.name,
+                email: admin ? admin.districtHeadEmail : d.email, // 👈 if admin found, use db email else frontend email
             };
         });
 
-        // ✅ Create new thread
+
+        // ✅ Create new Thread
         const newThread = await Thread.create({
             title,
             state,
             block,
             department,
-            departmentHead: departmentHeadWithEmail, // [{ name, email }]
-            districtHead: districtHeadWithEmail,     // [{ name, email }]
+            district,
+            departmentHead: departmentHeadWithEmail,
+            districtHead: districtHeadWithEmail,
         });
 
         res.status(201).json({
@@ -80,9 +87,6 @@ export const createThread = async (req, res) => {
         });
     }
 };
-
-
-
 
 
 

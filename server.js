@@ -19,6 +19,8 @@ import adminLoginRouter from './routes/adminLoginRoutes.js';
 import adminThreadRouter from './routes/adminThreadsRoutes.js';
 import adminMessageRouter from './routes/adminMessageRoutes.js';
 import districtHeadLoginRouter from './routes/districtLoginRoutes.js';
+import districtThreadRouter from './routes/districtThreadsRoutes.js';
+import districtMessageRouter from './routes/districtMessageRoutes.js';
 // import AdminthreadsWithUnreadCountRouter from './routes/AdminthreadsWithUnreadCountRoutes.js';
 
 dotenv.config();
@@ -43,11 +45,11 @@ app.use("/api/super-admin", superAdminRouter);
 app.use("/api/admin", adminLoginRouter);
 app.use("/api/admin/threads", adminThreadRouter);
 app.use("/api/admin/messages", adminMessageRouter);
-// app.use("/api/admin/thread-with-unread-count", AdminthreadsWithUnreadCountRouter)
-// routes/adminMessageRoutes.js
 
 //district routes
 app.use("/api/district-admin", districtHeadLoginRouter);
+app.use("/api/district-admin/threads", districtThreadRouter);
+app.use("/api/district-admin/messages", districtMessageRouter);
 
 // Block routes
 app.use("/api/blocks", blockRouter)

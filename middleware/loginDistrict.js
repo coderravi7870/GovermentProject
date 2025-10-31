@@ -17,6 +17,9 @@ export const districtProtect = (req, res, next) => {
             });
         }
 
+        // console.log("📦 Received Token =>", token); // 👈 yahan dekh token sahi mil raha ya nahi
+
+
         // ✅ Verify Token
         const decoded = jwt.verify(token, process.env.JWT_SECRET || "change_this_secret");
 
