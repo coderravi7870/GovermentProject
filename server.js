@@ -40,7 +40,7 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.options('*', cors());
+app.options('/api/admin/login', cors());
 // Routes
 app.use("/api/admin", adminRouter);
 app.use("/api/threads", threadRouter);
